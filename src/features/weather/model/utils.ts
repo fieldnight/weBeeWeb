@@ -1,4 +1,4 @@
-import { ForecastData, DailyForecast, WeatherData } from "./types";
+import { ForecastData, DailyForecast, /*WeatherData*/ } from "./types";
 
 /**
  * 날씨 상태에 따른 이모지 아이콘 반환
@@ -143,26 +143,27 @@ export const getDailyForecast = (
 
 /**
  * 현재 날씨 상태에 따른 벌 관련 메시지 생성
+ * 계절, 종류별 행동 메시지 반환 필요라 일단 보류 
  */
-export const getBeeMessage = (
-  weatherData: WeatherData | null
-): string | null => {
-  if (!weatherData) return null;
+// export const getBeeMessage = (
+//   weatherData: WeatherData | null
+// ): string | null => {
+//   if (!weatherData) return null;
 
-  const currentTime = Date.now() / 1000;
-  const { sunrise, sunset } = weatherData.sys;
-  const weatherMain = weatherData.weather[0].main.toLowerCase();
+//   const currentTime = Date.now() / 1000;
+//   const { sunrise, sunset } = weatherData.sys;
+//   const weatherMain = weatherData.weather[0].main.toLowerCase();
 
-  const isDaytime = currentTime > sunrise && currentTime < sunset;
-  const isClearWeather = ["clear", "clouds"].includes(weatherMain);
+//   const isDaytime = currentTime > sunrise && currentTime < sunset;
+//   const isClearWeather = ["clear", "clouds"].includes(weatherMain);
 
-  if (!isDaytime) {
-    return "🌝 벌들이 자러 갈 시간이에요!";
-  }
+//   if (!isDaytime) {
+//     return "🌝 벌들이 자러 갈 시간이에요!";
+//   }
 
-  if (isClearWeather) {
-    return "🐝 벌들이 활동하기 좋은 기상이에요.\n벌통을 활짝 열어주세요!";
-  }
+//   if (isClearWeather) {
+//     return "🐝 벌들이 활동하기 좋은 기상이에요.\n벌통을 활짝 열어주세요!";
+//   }
 
-  return "⛈️ 날씨가 나빠요! 벌통을 닫아주세요!";
-};
+//   return "⛈️ 날씨가 나빠요! 벌통을 닫아주세요!";
+// };

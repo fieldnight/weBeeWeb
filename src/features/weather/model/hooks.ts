@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { weatherApi } from "../api/api";
-import { WeatherState, DetailWeatherState, DetailWeatherData } from './types';
+import { WeatherState, DetailWeatherState, DetailWeatherData } from "./types";
 
 /**
  * 위치 기반 날씨 정보를 가져오는 커스텀 훅
@@ -18,7 +18,7 @@ export const useWeatherData = () => {
 
   const requestLocationData = async () => {
     if (!navigator.geolocation) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: "이 브라우저는 위치 정보를 지원하지 않습니다.",
         loading: false,
@@ -27,7 +27,7 @@ export const useWeatherData = () => {
       return;
     }
 
-    setState(prev => ({ ...prev, loading: true, hasRequested: true }));
+    setState((prev) => ({ ...prev, loading: true, hasRequested: true }));
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -41,7 +41,7 @@ export const useWeatherData = () => {
             weatherApi.getKoreanAddress(latitude, longitude),
           ]);
 
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             weatherData,
             forecastData,
@@ -50,7 +50,7 @@ export const useWeatherData = () => {
             error: "",
           }));
         } catch (error) {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             error: "데이터를 가져오는 데 실패했습니다.",
             loading: false,
@@ -59,7 +59,7 @@ export const useWeatherData = () => {
         }
       },
       () => {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           error: "위치 정보를 가져오는 데 실패했습니다.",
           loading: false,
@@ -95,7 +95,8 @@ export function useDetailWeather(koreanAddress: string): DetailWeatherState {
 
       try {
         const today = new Date().toISOString().split("T")[0];
-        const url = `https://apis.data.go.kr/1390802/AgriWeather/WeatherObsrInfo/V2/GnrlWeather/getWeatherTenMinList?serviceKey=${serviceKey}&Page_No=1&Page_Size=100&date=${today}`;
+
+        const url = `http://apis.data.go.kr/1390802/AgriWeather/WeatherObsrInfo/V3/GnrlWeather/getWeatherTenMinList3?serviceKey=${serviceKey}&Page_No=1&Page_Size=1&date=${today}&obsr_Spot_Nm=${koreanAddress}`;
 
         const response = await fetch(url);
         const xmlText = await response.text();
@@ -103,18 +104,24 @@ export function useDetailWeather(koreanAddress: string): DetailWeatherState {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         const items = xmlDoc.getElementsByTagName("item");
+        console.log("전체 관측소 개수:", items.length);
+        console.log("현재 한글 주소, 관측소:", koreanAddress, items);
 
         let matchedItem: Element | null = null;
 
         // 한글 주소와 매칭되는 관측소 찾기
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
-          const name = item.getElementsByTagName("stn_Name")[0]?.textContent ?? "";
+          const name =
+            item.getElementsByTagName("stn_Name")[0]?.textContent ?? "";
           if (name.includes(koreanAddress)) {
+            console.log("매칭된 관측소 이름:", name);
             matchedItem = item;
             break;
           }
         }
+
+        console.log("매칭된 관측소 상세 내용:", matchedItem);
 
         if (!matchedItem) {
           setError(`"${koreanAddress}"에 해당하는 관측소를 찾을 수 없습니다.`);
@@ -146,6 +153,7 @@ export function useDetailWeather(koreanAddress: string): DetailWeatherState {
         };
 
         setData(detailData);
+        console.log("농업기상 데이터:", detailData);
       } catch (err) {
         console.error("농업기상 API 호출 오류:", err);
         setError("데이터를 불러오는 데 실패했습니다.");
